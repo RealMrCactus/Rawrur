@@ -9,6 +9,8 @@ use std::{collections::HashMap, io::{stdout, Write}, ops::Not};
 struct Args {
     #[clap(short, long)]
     sync: bool,
+    #[clap(short, long)]
+    noconfirm: bool,
     
     query: String,
 }
@@ -17,10 +19,10 @@ async fn sync() -> std::result::Result<(), std::io::Error> {
     Ok(())
 }
 
-async fn handlesearch(query: &str, sync:bool) -> std::result::Result<(), raur::Error> {
+async fn handlesearch(query: &str, sync: bool, noconf: bool) -> std::result::Result<(), raur::Error> {
     let raur = raur::Handle::new();
 
-    // Use `search` to search using keywords (multiple strategies available)
+    // Use `search` to search using keywords.
     let pkgs = raur.search(query).await?;
     assert!(pkgs.len() > 1);
     
@@ -29,6 +31,7 @@ async fn handlesearch(query: &str, sync:bool) -> std::result::Result<(), raur::E
         if ! sync {
             println!("{:<30} {}", pkg.name, pkg.version.green());
         } else {
+            // Enumerate over how many packages are shown with the query provided.
             many = many + 1;
         }
     }
@@ -39,6 +42,7 @@ async fn handlesearch(query: &str, sync:bool) -> std::result::Result<(), raur::E
             // map packages to a number map
             let mut pkg_map: HashMap<usize, &Package> = HashMap::new();
 
+            // List the packages found
             for (index, pkg) in pkgs.iter().enumerate() {
                 println!("[{}] {:<30} {}", ((index as usize) + 1).to_string().red(), pkg.name, pkg.version.green());
                 pkg_map.insert(index + 1, pkg);
@@ -54,7 +58,6 @@ async fn handlesearch(query: &str, sync:bool) -> std::result::Result<(), raur::E
             std::io::stdin().read_line(&mut input).unwrap().to_string();
             
             // check if the input is valid
-
             if input.trim().is_empty() || input.trim().parse::<usize>().unwrap() < 1 {
                 eprintln!("{}", "\nInvalid input".red());
                 return Ok(());
@@ -71,19 +74,60 @@ async fn handlesearch(query: &str, sync:bool) -> std::result::Result<(), raur::E
             // get their answer
             input.clear();
             std::io::stdin().read_line(&mut input).unwrap().to_string();
-            println!("{}", input);
-            if input.to_lowercase().trim() == "y" || input.trim().is_empty() {
+
+            // check if input is valid.
+            if input.trim().to_lowercase() != "y" || input.trim().to_lowercase() != "n" || !input.trim().is_empty(){
+                eprintln!("{}", "\nInvalid input".red());
+                return Ok(());
+                
+            }
+
+            if noconf {
                 println!("Installing {}...", selected.unwrap().name);
+            } else if !noconf {
+                if input.to_lowercase().trim() == "y" || input.trim().is_empty() {
+                    println!("Installing {}...", selected.unwrap().name);
+                }
+            }
+
+        } else if many == 1 {
+            let mut input = String::new();
+            let selected = pkgs.first();
+
+            // prompt the user to install
+            print!("\nDo you want to install {}? [Y/n] ", selected.unwrap().name);
+            std::io::stdout().flush().unwrap();
+
+            std::io::stdin().read_line(&mut input).unwrap().to_string();
+
+            // check if input is valid.
+            if input.trim().to_lowercase() != "y" || input.trim().to_lowercase() != "n" || !input.trim().is_empty(){
+                eprintln!("{}", "\nInvalid input".red());
+                return Ok(());
+                
+            }
+
+            if noconf {
+                println!("Installing {}...", selected.unwrap().name);
+            } else if !noconf {
+                if input.to_lowercase().trim() == "y" || input.trim().is_empty() {
+                    println!("Installing {}...", selected.unwrap().name);
+                }
             }
         }
     }
+
     Ok(())
 }
 
 async fn search(query: &str, sync: bool) {
+    if query.trim().is_empty() {
+        eprintln!("{}", "No query recived.".red());
+    }
+
     match handlesearch(query, sync).await {   
         Ok(_) => println!("\n"),
-        Err(e) => eprintln!("Error: {}", e),
+        Err(e) => eprintln!("Error: {}", e.to_string().red()),
     }
 }
 

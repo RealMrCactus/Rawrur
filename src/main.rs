@@ -1,6 +1,7 @@
-use raur::Raur;
+use raur::{Package, Raur};
 use colored::Colorize;
 use clap::Parser;
+use std::{collections::HashMap, io::{stdout, Write}, ops::Not};
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -35,12 +36,44 @@ async fn handlesearch(query: &str, sync:bool) -> std::result::Result<(), raur::E
     if sync {
         println!("{} package(s) found", many);
         if many > 1 {
-            println!("Please choose from the list of packages to install.");
-
-            let mut index: i32 = 1;
+            // map packages to a number map
+            let mut pkg_map: HashMap<usize, &Package> = HashMap::new();
 
             for (index, pkg) in pkgs.iter().enumerate() {
-                println!("[{}] {:<30} {}", (index as usize) + 1, pkg.name, pkg.version.green());
+                println!("[{}] {:<30} {}", ((index as usize) + 1).to_string().red(), pkg.name, pkg.version.green());
+                pkg_map.insert(index + 1, pkg);
+            }
+            
+            // prompt the user.
+            println!("\n\nPlease select a package from the list above to install");
+            print!("> ");
+            std::io::stdout().flush().unwrap();
+            
+            // get input from the user.
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).unwrap().to_string();
+            
+            // check if the input is valid
+
+            if input.trim().is_empty() || input.trim().parse::<usize>().unwrap() < 1 {
+                eprintln!("{}", "\nInvalid input".red());
+                return Ok(());
+                
+            }
+
+            // get the package the user asked for.
+            let selected = pkg_map.get(&input.trim().parse::<usize>().unwrap());
+            
+            // prompt the user to install
+            print!("\nDo you want to install {}? [Y/n] ", selected.unwrap().name);
+            std::io::stdout().flush().unwrap();
+
+            // get their answer
+            input.clear();
+            std::io::stdin().read_line(&mut input).unwrap().to_string();
+            println!("{}", input);
+            if input.to_lowercase().trim() == "y" || input.trim().is_empty() {
+                println!("Installing {}...", selected.unwrap().name);
             }
         }
     }

@@ -12,3 +12,6 @@ Because I got bored one day and decided to program a package manager.
 
 # To-Do
 
+- [X] Implement package searching and selection when running sync
+- [ ] Implement downloading and installing the package
+- [ ] Figure out other functions to add to the program e.g. updating

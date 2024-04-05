@@ -120,12 +120,12 @@ async fn handlesearch(query: &str, sync: bool, noconf: bool) -> std::result::Res
     Ok(())
 }
 
-async fn search(query: &str, sync: bool) {
+async fn search(query: &str, sync: bool, noconf: bool) {
     if query.trim().is_empty() {
         eprintln!("{}", "No query recived.".red());
     }
 
-    match handlesearch(query, sync).await {   
+    match handlesearch(query, sync, noconf).await {   
         Ok(_) => println!("\n"),
         Err(e) => eprintln!("Error: {}", e.to_string().red()),
     }
@@ -134,5 +134,5 @@ async fn search(query: &str, sync: bool) {
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
-    search(&args.query, args.sync).await;
+    search(&args.query, args.sync, args.noconfirm).await;
 }

@@ -6,10 +6,14 @@ an AUR (Arch User Repository) package manager built in rust.
 ---
 
 ## Why?
-Because I got bored one day and decided to program a package manager.
+Because I got bored one day and decided to program a package manager, I also feel there should be more options for aur package managers right now I think there is only one rust PM i feel there should be more.
+
+
 
 # To-Do
 
 - [X] Implement package searching and selection when running sync
+- [ ] Implement pulling the package zip
+- [ ] handle the PKGBUILD
 - [ ] Implement downloading and installing the package
 - [ ] Figure out other functions to add to the program e.g. updating

@@ -8,7 +8,8 @@ an AUR (Arch User Repository) package manager built in rust.
 ## Why?
 Because I got bored one day and decided to program a package manager, I also feel there should be more options for aur package managers right now I think there is only one rust PM i feel there should be more.
 
-
+# Installation guide
+Todo!
 
 # To-Do
 

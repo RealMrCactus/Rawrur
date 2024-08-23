@@ -3,19 +3,21 @@ use colored::Colorize;
 use clap::Parser;
 use std::{collections::HashMap, io::{stdout, Write}, ops::Not};
 
-/// Simple program to greet a person
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
+
+// Implement default for args.
 struct Args {
     #[clap(short, long)]
     sync: bool,
     #[clap(short, long)]
     noconfirm: bool,
-    
+    #[clap(short, long)]
     query: String,
 }
     
-async fn sync() -> std::result::Result<(), std::io::Error> {
+async fn sync(pkg: &str) -> std::result::Result<(), std::io::Error> {
+    // process for downloading from the AUR
     Ok(())
 }
 
@@ -28,7 +30,7 @@ async fn handlesearch(query: &str, sync: bool, noconf: bool) -> std::result::Res
     
     let mut many: i32 = 0;
     for pkg in &pkgs {
-        if ! sync {
+        if ! sync { // Does this even work????
             println!("{:<30} {}", pkg.name, pkg.version.green());
         } else {
             // Enumerate over how many packages are shown with the query provided.
@@ -48,7 +50,12 @@ async fn handlesearch(query: &str, sync: bool, noconf: bool) -> std::result::Res
                 pkg_map.insert(index + 1, pkg);
             }
             
-            // prompt the user.
+            /* prompt the user.
+
+            USE CROSSTERM
+
+            */
+            
             println!("\n\nPlease select a package from the list above to install");
             print!("> ");
             std::io::stdout().flush().unwrap();
@@ -68,7 +75,7 @@ async fn handlesearch(query: &str, sync: bool, noconf: bool) -> std::result::Res
             let selected = pkg_map.get(&input.trim().parse::<usize>().unwrap());
             
             // prompt the user to install
-            print!("\nDo you want to install {}? [Y/n] ", selected.unwrap().name);
+            print!("\nWould you like to install {}? [Y/n] ", selected.unwrap().name);
             std::io::stdout().flush().unwrap();
 
             // get their answer
@@ -95,7 +102,7 @@ async fn handlesearch(query: &str, sync: bool, noconf: bool) -> std::result::Res
             let selected = pkgs.first();
 
             // prompt the user to install
-            print!("\nDo you want to install {}? [Y/n] ", selected.unwrap().name);
+            print!("\nWould you like to install {}? [Y/n] ", selected.unwrap().name);
             std::io::stdout().flush().unwrap();
 
             std::io::stdin().read_line(&mut input).unwrap().to_string();
@@ -134,5 +141,8 @@ async fn search(query: &str, sync: bool, noconf: bool) {
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
-    search(&args.query, args.sync, args.noconfirm).await;
+
+    if Some(&args.query) = &args.query {
+        search(&args.query, args.sync, args.noconfirm).await;
+    }
 }

@@ -1,3 +1,6 @@
+mod args;
+mod util;
+
 use raur::{Package, Raur};
 use colored::Colorize;
 use clap::Parser;
@@ -6,19 +9,16 @@ use std::{collections::HashMap, io::{stdout, Write}, ops::Not};
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 
-// Implement default for args.
+// Use util/mod.rs for conf messages soon.
 struct Args {
-    #[clap(short, long)]
+    #[clap(short, long, default_value = "false")]
     sync: bool,
-    #[clap(short, long)]
+    #[clap(short, long, default_value = "false")]
     noconfirm: bool,
-    #[clap(short, long)]
+    #[clap(short, long, default_value = "")]
     query: String,
-}
-    
-async fn sync(pkg: &str) -> std::result::Result<(), std::io::Error> {
-    // process for downloading from the AUR
-    Ok(())
+    #[clap(short, long, default_value = "")]
+    remove: String,
 }
 
 async fn handlesearch(query: &str, sync: bool, noconf: bool) -> std::result::Result<(), raur::Error> {
@@ -34,7 +34,7 @@ async fn handlesearch(query: &str, sync: bool, noconf: bool) -> std::result::Res
             println!("{:<30} {}", pkg.name, pkg.version.green());
         } else {
             // Enumerate over how many packages are shown with the query provided.
-            many = many + 1;
+            many += 1;
         }
     }
 
@@ -142,7 +142,8 @@ async fn search(query: &str, sync: bool, noconf: bool) {
 async fn main() {
     let args = Args::parse();
 
-    if Some(&args.query) = &args.query {
+    // check for args.query
+    if !args.query.is_empty() {
         search(&args.query, args.sync, args.noconfirm).await;
     }
 }

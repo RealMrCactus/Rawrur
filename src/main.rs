@@ -68,59 +68,25 @@ async fn handlesearch(query: &str, sync: bool, noconf: bool) -> std::result::Res
             if input.trim().is_empty() || input.trim().parse::<usize>().unwrap() < 1 {
                 eprintln!("{}", "\nInvalid input".red());
                 return Ok(());
-                
             }
-
+            
             // get the package the user asked for.
             let selected = pkg_map.get(&input.trim().parse::<usize>().unwrap());
-            
+
             // prompt the user to install
-            print!("\nWould you like to install {}? [Y/n] ", selected.unwrap().name);
-            std::io::stdout().flush().unwrap();
+            let ans = util::yn_prompt_install(format!("{:?}", selected.unwrap().name), noconf);
+            
+            print!("{}", ans);
 
-            // get their answer
-            input.clear();
-            std::io::stdin().read_line(&mut input).unwrap().to_string();
-
-            // check if input is valid.
-            if input.trim().to_lowercase() != "y" || input.trim().to_lowercase() != "n" || !input.trim().is_empty(){
-                eprintln!("{}", "\nInvalid input".red());
-                return Ok(());
-                
-            }
-
-            if noconf {
-                println!("Installing {}...", selected.unwrap().name);
-            } else if !noconf {
-                if input.to_lowercase().trim() == "y" || input.trim().is_empty() {
-                    println!("Installing {}...", selected.unwrap().name);
-                }
-            }
+            // install pkg
 
         } else if many == 1 {
-            let mut input = String::new();
             let selected = pkgs.first();
 
             // prompt the user to install
-            print!("\nWould you like to install {}? [Y/n] ", selected.unwrap().name);
-            std::io::stdout().flush().unwrap();
-
-            std::io::stdin().read_line(&mut input).unwrap().to_string();
-
-            // check if input is valid.
-            if input.trim().to_lowercase() != "y" || input.trim().to_lowercase() != "n" || !input.trim().is_empty(){
-                eprintln!("{}", "\nInvalid input".red());
-                return Ok(());
-                
-            }
-
-            if noconf {
-                println!("Installing {}...", selected.unwrap().name);
-            } else if !noconf {
-                if input.to_lowercase().trim() == "y" || input.trim().is_empty() {
-                    println!("Installing {}...", selected.unwrap().name);
-                }
-            }
+            let ans = util::yn_prompt_install(format!("{:?}", selected), noconf);
+            
+            print!("{}", ans);
         }
     }
 
